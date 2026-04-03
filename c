@@ -1,77 +1,120 @@
 using System;
+using System.Collections.Generic;
 
 class NumberGuessingGame
 {
     static void Main()
     {
         Random random = new Random();
+        List<(string Difficulty, int Attempts)> highScores = new();
+        bool playAgain = true;
 
         Console.WriteLine("Welcome to the Number Guessing Game!");
-        Console.WriteLine("=========================================");
 
-        // --- Difficulty Selection ---
-        int maxNumber, maxAttempts;
-        string difficultyLabel;
-
-        Console.WriteLine("Select Difficulty:");
-        Console.WriteLine("  1. Easy   - Guess 1 to 100  (10 attempts)");
-        Console.WriteLine("  2. Medium - Guess 1 to 100  ( 7 attempts)");
-        Console.WriteLine("  3. Hard   - Guess 1 to 200  ( 5 attempts)");
-        Console.Write("Enter choice (1/2/3): ");
-
-        string diffChoice = Console.ReadLine();
-        switch (diffChoice)
+        while (playAgain)
         {
-            case "2":
-                maxNumber = 100; maxAttempts = 7; difficultyLabel = "Medium";
-                break;
-            case "3":
-                maxNumber = 200; maxAttempts = 5; difficultyLabel = "Hard";
-                break;
-            default:
-                maxNumber = 100; maxAttempts = 10; difficultyLabel = "Easy";
-                break;
-        }
+            Console.WriteLine("=========================================");
 
-        Console.WriteLine($"\n[{difficultyLabel}] Guess a number between 1 and {maxNumber}. You have {maxAttempts} attempts.");
-        Console.WriteLine("=========================================\n");
+            // --- Difficulty Selection ---
+            int maxNumber, maxAttempts;
+            string difficultyLabel;
 
-        int secretNumber = random.Next(1, maxNumber + 1);
-        int attempts = 0;
-        int guess = 0;
+            Console.WriteLine("Select Difficulty:");
+            Console.WriteLine("  1. Easy   - Guess 1 to 100  (10 attempts)");
+            Console.WriteLine("  2. Medium - Guess 1 to 100  ( 7 attempts)");
+            Console.WriteLine("  3. Hard   - Guess 1 to 200  ( 5 attempts)");
+            Console.Write("Enter choice (1/2/3): ");
 
-        // --- Game Loop ---
-        while (guess != secretNumber && attempts < maxAttempts)
-        {
-            int remaining = maxAttempts - attempts;
-            Console.Write($"Enter your guess ({remaining} attempt{(remaining == 1 ? "" : "s")} left): ");
-
-            if (!int.TryParse(Console.ReadLine(), out guess))
+            switch (Console.ReadLine())
             {
-                Console.WriteLine("⚠  Please enter a valid number.\n");
-                continue;
+                case "2":
+                    maxNumber = 100; maxAttempts = 7; difficultyLabel = "Medium";
+                    break;
+                case "3":
+                    maxNumber = 200; maxAttempts = 5; difficultyLabel = "Hard";
+                    break;
+                default:
+                    maxNumber = 100; maxAttempts = 10; difficultyLabel = "Easy";
+                    break;
             }
 
-            if (guess < 1 || guess > maxNumber)
+            Console.WriteLine($"\n[{difficultyLabel}] Guess a number between 1 and {maxNumber}. You have {maxAttempts} attempts.");
+            Console.WriteLine("=========================================\n");
+
+            int secretNumber = random.Next(1, maxNumber + 1);
+            int attempts = 0;
+            int guess = 0;
+            bool won = false;
+
+            // --- Game Loop ---
+            while (guess != secretNumber && attempts < maxAttempts)
             {
-                Console.WriteLine($"⚠  Number must be between 1 and {maxNumber}.\n");
-                continue;
+                int remaining = maxAttempts - attempts;
+                Console.Write($"Enter your guess ({remaining} attempt{(remaining == 1 ? "" : "s")} left): ");
+
+                if (!int.TryParse(Console.ReadLine(), out guess))
+                {
+                    Console.WriteLine("⚠  Please enter a valid number.\n");
+                    continue;
+                }
+
+                if (guess < 1 || guess > maxNumber)
+                {
+                    Console.WriteLine($"⚠  Number must be between 1 and {maxNumber}.\n");
+                    continue;
+                }
+
+                attempts++;
+
+                if (guess < secretNumber)
+                    Console.WriteLine("📉 Too low! Try again.\n");
+                else if (guess > secretNumber)
+                    Console.WriteLine("📈 Too high! Try again.\n");
+                else
+                {
+                    won = true;
+                    Console.WriteLine($"🎉 Correct! You guessed it in {attempts} attempt{(attempts == 1 ? "" : "s")}.");
+                }
             }
 
-            attempts++;
+            if (!won)
+                Console.WriteLine($"💀 Out of attempts! The number was {secretNumber}.");
 
-            if (guess < secretNumber)
-                Console.WriteLine("📉 Too low! Try again.\n");
-            else if (guess > secretNumber)
-                Console.WriteLine("📈 Too high! Try again.\n");
-            else
-                Console.WriteLine($"🎉 Correct! You guessed it in {attempts} attempt{(attempts == 1 ? "" : "s")}.");
+            // --- High Score Tracking ---
+            if (won)
+            {
+                highScores.Add((difficultyLabel, attempts));
+                Console.WriteLine("\n🏆 High Scores:");
+                Console.WriteLine($"  {"Difficulty",-10} {"Attempts",8}");
+                Console.WriteLine($"  {new string('-', 20)}");
+
+                foreach (var score in highScores)
+                    Console.WriteLine($"  {score.Difficulty,-10} {score.Attempts,8}");
+            }
+
+            // --- Replay Prompt ---
+            Console.WriteLine("\n=========================================");
+            Console.Write("Play again? (Y/N): ");
+            string input = Console.ReadLine()?.Trim().ToUpper();
+            playAgain = input == "Y";
+
+            Console.WriteLine();
         }
 
-        if (guess != secretNumber)
-            Console.WriteLine($"💀 Out of attempts! The number was {secretNumber}.");
+        Console.WriteLine("Thanks for playing! Final High Scores:");
+        if (highScores.Count == 0)
+        {
+            Console.WriteLine("  No wins recorded.");
+        }
+        else
+        {
+            Console.WriteLine($"  {"Difficulty",-10} {"Attempts",8}");
+            Console.WriteLine($"  {new string('-', 20)}");
+            foreach (var score in highScores)
+                Console.WriteLine($"  {score.Difficulty,-10} {score.Attempts,8}");
+        }
 
-        Console.WriteLine("\nGame Over. Press any key to exit.");
+        Console.WriteLine("\nPress any key to exit.");
         Console.ReadKey();
     }
 }
