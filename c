@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 class NumberGuessingGame
 {
@@ -13,6 +14,7 @@ class NumberGuessingGame
 
         while (playAgain)
         {
+            Console.Clear();
             Console.WriteLine("=========================================");
 
             // --- Difficulty Selection ---
@@ -28,13 +30,19 @@ class NumberGuessingGame
             switch (Console.ReadLine())
             {
                 case "2":
-                    maxNumber = 100; maxAttempts = 7; difficultyLabel = "Medium";
+                    maxNumber = 100;
+                    maxAttempts = 7;
+                    difficultyLabel = "Medium";
                     break;
                 case "3":
-                    maxNumber = 200; maxAttempts = 5; difficultyLabel = "Hard";
+                    maxNumber = 200;
+                    maxAttempts = 5;
+                    difficultyLabel = "Hard";
                     break;
                 default:
-                    maxNumber = 100; maxAttempts = 10; difficultyLabel = "Easy";
+                    maxNumber = 100;
+                    maxAttempts = 10;
+                    difficultyLabel = "Easy";
                     break;
             }
 
@@ -54,13 +62,13 @@ class NumberGuessingGame
 
                 if (!int.TryParse(Console.ReadLine(), out guess))
                 {
-                    Console.WriteLine("⚠  Please enter a valid number.\n");
+                    Console.WriteLine("⚠ Please enter a valid number.\n");
                     continue;
                 }
 
                 if (guess < 1 || guess > maxNumber)
                 {
-                    Console.WriteLine($"⚠  Number must be between 1 and {maxNumber}.\n");
+                    Console.WriteLine($"⚠ Number must be between 1 and {maxNumber}.\n");
                     continue;
                 }
 
@@ -84,6 +92,13 @@ class NumberGuessingGame
             if (won)
             {
                 highScores.Add((difficultyLabel, attempts));
+
+                // Sort and keep top 5 scores
+                highScores = highScores
+                    .OrderBy(s => s.Attempts)
+                    .Take(5)
+                    .ToList();
+
                 Console.WriteLine("\n🏆 High Scores:");
                 Console.WriteLine($"  {"Difficulty",-10} {"Attempts",8}");
                 Console.WriteLine($"  {new string('-', 20)}");
@@ -110,6 +125,7 @@ class NumberGuessingGame
         {
             Console.WriteLine($"  {"Difficulty",-10} {"Attempts",8}");
             Console.WriteLine($"  {new string('-', 20)}");
+
             foreach (var score in highScores)
                 Console.WriteLine($"  {score.Difficulty,-10} {score.Attempts,8}");
         }
